@@ -54,10 +54,51 @@
 <% unless @message.full_message.blank? %>
   <% escaped_fullmsg = h(@message.full_message) %>
   <h3>Full message:</h3>
-  <p class="messages-show-message messages-full-message">
-    <%= raw(auto_link(escaped_fullmsg.gsub(/\n/, '<br />'), :html => { :target => "blank" }, :link => :urls)) %>
-  </p>
+  <pre><%= escaped_fullmsg %></pre>
+    <script type="text/javascript">
+    (function() {
+        if(!document.querySelectorAll) { return; }
+
+        var sp = '{~{REPLACE}~}';
+
+        Array.prototype.forEach.call(document.querySelectorAll('pre'), function(n) {
+            var h = n.innerHTML,
+                df = document.createDocumentFragment(),
+                lines = h.split(/\n/g);
+
+            if(n.classList.contains('formatted')) { return; }
+
+            lines.forEach(function(line) {
+                var el = document.createElement('span'),
+                    t = (/^(\t+)|(\s{4,})/).exec(line),
+                    parts = line.replace(/([\[\(\.\$])/g, "$1"+sp).split(sp);
+
+                line = parts.join('<i> </i>');
+                line = line.replace(/^\t+|\s{4,}/g, '');
+
+                el.className = 'indent-' + (t ? (t[1] ? t[1].length : Math.floor(t[2].length / 4)) : 0);
+
+                line = line.replace(/(\s\s+|\t+)/g, '<em>$1</em>');
+                el.innerHTML = line;
+
+                df.appendChild(el);
+            });
+
+            n.innerHTML = '';
+            n.appendChild(df);
+
+            n.classList.add('formatted');
+        });
+
+    }());
+    </script>
+    <% if false %>
+    <p class="messages-show-message messages-full-message">
+       <%= raw(auto_link(escaped_fullmsg.gsub(/\n/, '<br />'), :html => { :target => "blank" }, :link => :urls)) %>
+    </p>
+  <% end %>
 <% end %>
+
 
 <% unless @message.streams.blank? %>
   <h3>Filed in following streams:</h3>
